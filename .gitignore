@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# 가상환경
+venv/
+.venv/
+
+# 환경 변수
+.env
+
+# IDE
+.vscode/
+.idea/
