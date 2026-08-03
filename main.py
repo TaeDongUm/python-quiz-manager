@@ -27,6 +27,10 @@ class QuizGame:
         print("=" * 40)
 
     def play_quiz(self) -> None:
+        if not self.quizzes:
+            print("등록된 퀴즈가 없습니다.")
+            return
+
         print("퀴즈 풀기를 시작합니다.")
         correct_count = 0
 
