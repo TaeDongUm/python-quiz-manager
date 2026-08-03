@@ -1,6 +1,9 @@
 class QuizGame:
     """콘솔 퀴즈 게임의 기본 화면을 관리한다."""
 
+    def __init__(self) -> None:
+        self.is_running = True
+
     def display_menu(self) -> None:
         print("=" * 40)
         print("        나만의 퀴즈 게임")
@@ -26,6 +29,7 @@ class QuizGame:
 
     def exit_game(self) -> None:
         print("프로그램을 종료합니다.")
+        self.is_running = False
 
     def run(self) -> None:
         actions = {
@@ -36,15 +40,13 @@ class QuizGame:
             "5": self.exit_game,
         }
 
-        while True:
+        while self.is_running:
             self.display_menu()
             choice = input("선택: ")
 
             action = actions.get(choice)
             if action:
                 action()
-                if choice == "5":
-                    break
 
 
 def main() -> None:
