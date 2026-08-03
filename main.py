@@ -17,6 +17,8 @@ class QuizGame:
 
     def play_quiz(self) -> None:
         print("퀴즈 풀기 기능을 실행합니다.")
+        self.get_int_input("정답 입력 (1-4): ", 1, 4)
+        print("정답 번호 입력이 완료되었습니다.")
 
     def add_quiz(self) -> None:
         print("퀴즈 추가 기능을 실행합니다.")
@@ -31,24 +33,27 @@ class QuizGame:
         print("프로그램을 종료합니다.")
         self.is_running = False
 
-    def get_menu_choice(self) -> str:
+    def get_int_input(self, prompt: str, min_value: int, max_value: int) -> int:
         while True:
-            raw_value = input("선택: ").strip()
+            raw_value = input(prompt).strip()
             if raw_value == "":
-                print("잘못된 입력입니다. 1-5 사이의 숫자를 입력하세요.")
+                print(f"잘못된 입력입니다. {min_value}-{max_value} 사이의 숫자를 입력하세요.")
                 continue
 
             try:
-                choice = int(raw_value)
+                value = int(raw_value)
             except ValueError:
-                print("잘못된 입력입니다. 1-5 사이의 숫자를 입력하세요.")
+                print(f"잘못된 입력입니다. {min_value}-{max_value} 사이의 숫자를 입력하세요.")
                 continue
 
-            if choice < 1 or choice > 5:
-                print("잘못된 입력입니다. 1-5 사이의 숫자를 입력하세요.")
+            if value < min_value or value > max_value:
+                print(f"잘못된 입력입니다. {min_value}-{max_value} 사이의 숫자를 입력하세요.")
                 continue
 
-            return str(choice)
+            return value
+
+    def get_menu_choice(self) -> str:
+        return str(self.get_int_input("선택: ", 1, 5))
 
     def run(self) -> None:
         actions = {
