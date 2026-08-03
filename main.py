@@ -42,7 +42,7 @@ class QuizGame:
 
         while self.is_running:
             self.display_menu()
-            choice = input("선택: ")
+            choice = input("선택: ").strip()
 
             action = actions.get(choice)
             if action:
