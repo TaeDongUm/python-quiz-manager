@@ -28,9 +28,6 @@ class QuizGame:
         print("프로그램을 종료합니다.")
 
     def run(self) -> None:
-        self.display_menu()
-        choice = input("선택: ")
-
         actions = {
             "1": self.play_quiz,
             "2": self.add_quiz,
@@ -39,9 +36,15 @@ class QuizGame:
             "5": self.exit_game,
         }
 
-        action = actions.get(choice)
-        if action:
-            action()
+        while True:
+            self.display_menu()
+            choice = input("선택: ")
+
+            action = actions.get(choice)
+            if action:
+                action()
+                if choice == "5":
+                    break
 
 
 def main() -> None:
