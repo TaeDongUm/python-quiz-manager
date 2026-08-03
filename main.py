@@ -28,13 +28,19 @@ class QuizGame:
 
     def play_quiz(self) -> None:
         print("퀴즈 풀기를 시작합니다.")
+        correct_count = 0
+
         for index, quiz in enumerate(self.quizzes, start=1):
             quiz.display(index)
             user_answer = self.get_int_input("정답 입력 (1-4): ", 1, 4)
             if quiz.is_correct(user_answer):
+                correct_count += 1
                 print("정답입니다!")
             else:
                 print(f"오답입니다. 정답은 {quiz.answer}번입니다.")
+
+        print(f"\n총 {len(self.quizzes)}문제 중 {correct_count}문제를 맞혔습니다.")
+        print(f"최종 점수: {correct_count}점")
 
     def add_quiz(self) -> None:
         print("퀴즈 추가 기능을 실행합니다.")
