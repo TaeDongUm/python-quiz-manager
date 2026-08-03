@@ -1,6 +1,8 @@
 import json
 import os
 
+from quiz import DEFAULT_QUIZZES, Quiz
+
 STATE_FILE = "state.json"
 
 
@@ -9,7 +11,7 @@ class QuizGame:
 
     def __init__(self) -> None:
         self.is_running = True
-        self.quizzes: list = []
+        self.quizzes: list[Quiz] = []
         self.best_score: int | None = None
         self.load_state()
 
@@ -44,20 +46,21 @@ class QuizGame:
 
     def load_state(self) -> None:
         if not os.path.exists(STATE_FILE):
+            self.quizzes = list(DEFAULT_QUIZZES)
             return
 
         try:
             with open(STATE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            self.quizzes = data.get("quizzes", [])
+            self.quizzes = [Quiz.from_dict(q) for q in data.get("quizzes", [])]
             self.best_score = data.get("best_score", None)
         except json.JSONDecodeError:
             print("ERROR: state.json 파일이 손상되었습니다. 기본 데이터로 초기화합니다.")
-            self.quizzes = []
+            self.quizzes = list(DEFAULT_QUIZZES)
             self.best_score = None
         except OSError as e:
             print(f"ERROR: 파일을 읽는 중 오류가 발생했습니다: {e}")
-            self.quizzes = []
+            self.quizzes = list(DEFAULT_QUIZZES)
             self.best_score = None
 
     def safe_exit(self, message: str) -> None:
