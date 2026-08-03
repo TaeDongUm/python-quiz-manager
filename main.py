@@ -31,6 +31,25 @@ class QuizGame:
         print("프로그램을 종료합니다.")
         self.is_running = False
 
+    def get_menu_choice(self) -> str:
+        while True:
+            raw_value = input("선택: ").strip()
+            if raw_value == "":
+                print("잘못된 입력입니다. 1-5 사이의 숫자를 입력하세요.")
+                continue
+
+            try:
+                choice = int(raw_value)
+            except ValueError:
+                print("잘못된 입력입니다. 1-5 사이의 숫자를 입력하세요.")
+                continue
+
+            if choice < 1 or choice > 5:
+                print("잘못된 입력입니다. 1-5 사이의 숫자를 입력하세요.")
+                continue
+
+            return str(choice)
+
     def run(self) -> None:
         actions = {
             "1": self.play_quiz,
@@ -42,7 +61,7 @@ class QuizGame:
 
         while self.is_running:
             self.display_menu()
-            choice = input("선택: ").strip()
+            choice = self.get_menu_choice()
 
             action = actions.get(choice)
             if action:
