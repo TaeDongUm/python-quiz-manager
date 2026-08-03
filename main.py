@@ -33,6 +33,10 @@ class QuizGame:
         print("프로그램을 종료합니다.")
         self.is_running = False
 
+    def safe_exit(self, message: str) -> None:
+        print(f"\n{message}")
+        print("프로그램을 안전하게 종료합니다.")
+
     def get_int_input(self, prompt: str, min_value: int, max_value: int) -> int:
         while True:
             raw_value = input(prompt).strip()
@@ -64,13 +68,18 @@ class QuizGame:
             "5": self.exit_game,
         }
 
-        while self.is_running:
-            self.display_menu()
-            choice = self.get_menu_choice()
+        try:
+            while self.is_running:
+                self.display_menu()
+                choice = self.get_menu_choice()
 
-            action = actions.get(choice)
-            if action:
-                action()
+                action = actions.get(choice)
+                if action:
+                    action()
+        except KeyboardInterrupt:
+            self.safe_exit("사용자에 의해 프로그램이 중단되었습니다.")
+        except EOFError:
+            self.safe_exit("입력 스트림이 종료되었습니다.")
 
 
 def main() -> None:
