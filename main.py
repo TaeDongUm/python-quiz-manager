@@ -51,8 +51,21 @@ class QuizGame:
 
         try:
             with open(STATE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            self.quizzes = [Quiz.from_dict(q) for q in data.get("quizzes", [])]
+                content = f.read().strip()
+
+            if content == "":
+                self.quizzes = list(DEFAULT_QUIZZES)
+                self.best_score = None
+                return
+
+            data = json.loads(content)
+            quizzes_data = data.get("quizzes", [])
+            if not quizzes_data:
+                self.quizzes = list(DEFAULT_QUIZZES)
+                self.best_score = data.get("best_score", None)
+                return
+
+            self.quizzes = [Quiz.from_dict(q) for q in quizzes_data]
             self.best_score = data.get("best_score", None)
         except json.JSONDecodeError:
             print("ERROR: state.json 파일이 손상되었습니다. 기본 데이터로 초기화합니다.")
