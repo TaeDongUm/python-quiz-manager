@@ -30,6 +30,7 @@ class QuizGame:
         print("퀴즈 풀기를 시작합니다.")
         for index, quiz in enumerate(self.quizzes, start=1):
             quiz.display(index)
+            self.get_int_input("정답 입력 (1-4): ", 1, 4)
 
     def add_quiz(self) -> None:
         print("퀴즈 추가 기능을 실행합니다.")
