@@ -75,6 +75,7 @@ class QuizGame:
             answer=answer,
         )
         self.quizzes.append(new_quiz)
+        self.save_state()
         print(f"문제, 선택지, 정답 번호 입력이 완료되었습니다. (총 {len(self.quizzes)}개)")
 
     def get_non_empty_text_input(self, prompt: str) -> str:
@@ -126,6 +127,18 @@ class QuizGame:
             print(f"ERROR: 파일을 읽는 중 오류가 발생했습니다: {e}")
             self.quizzes = list(DEFAULT_QUIZZES)
             self.best_score = None
+
+    def save_state(self) -> None:
+        data = {
+            "quizzes": [quiz.to_dict() for quiz in self.quizzes],
+            "best_score": self.best_score,
+        }
+
+        try:
+            with open(STATE_FILE, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=True, indent=4)
+        except OSError as e:
+            print(f"ERROR: 파일을 저장하는 중 오류가 발생했습니다: {e}")
 
     def safe_exit(self, message: str) -> None:
         print(f"\n{message}")
