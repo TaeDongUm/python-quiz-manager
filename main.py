@@ -87,7 +87,7 @@ class QuizGame:
             return value
 
     def show_quizzes(self) -> None:
-        print("퀴즈 목록 기능을 실행합니다.")
+        print(f"등록된 퀴즈는 총 {len(self.quizzes)}개입니다.")
 
     def show_score(self) -> None:
         print("점수 확인 기능을 실행합니다.")
