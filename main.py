@@ -61,11 +61,14 @@ class QuizGame:
             choice = input(f"선택지 {index}: ").strip()
             choices.append(choice)
 
+        answer = self.get_int_input("정답 번호 (1-4): ", 1, 4)
+
         self.pending_quiz_input = {
             "question": question,
             "choices": choices,
+            "answer": answer,
         }
-        print("문제와 선택지 입력이 완료되었습니다.")
+        print("문제, 선택지, 정답 번호 입력이 완료되었습니다.")
 
     def show_quizzes(self) -> None:
         print("퀴즈 목록 기능을 실행합니다.")
