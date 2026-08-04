@@ -68,7 +68,14 @@ class QuizGame:
             "choices": choices,
             "answer": answer,
         }
-        print("문제, 선택지, 정답 번호 입력이 완료되었습니다.")
+
+        new_quiz = Quiz(
+            question=question,
+            choices=choices,
+            answer=answer,
+        )
+        self.quizzes.append(new_quiz)
+        print(f"문제, 선택지, 정답 번호 입력이 완료되었습니다. (총 {len(self.quizzes)}개)")
 
     def get_non_empty_text_input(self, prompt: str) -> str:
         while True:
