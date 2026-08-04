@@ -99,7 +99,7 @@ class QuizGame:
             print(f"{index}. {quiz.question}")
 
     def show_score(self) -> None:
-        print("점수 확인 기능을 실행합니다.")
+        print(f"현재 최고 점수는 {self.best_score}점입니다.")
 
     def exit_game(self) -> None:
         print("프로그램을 종료합니다.")
