@@ -87,6 +87,10 @@ class QuizGame:
             return value
 
     def show_quizzes(self) -> None:
+        if not self.quizzes:
+            print("등록된 퀴즈가 없습니다.")
+            return
+
         print(f"등록된 퀴즈는 총 {len(self.quizzes)}개입니다.")
         for index, quiz in enumerate(self.quizzes, start=1):
             print(f"{index}. {quiz.question}")
