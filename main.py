@@ -54,11 +54,11 @@ class QuizGame:
 
     def add_quiz(self) -> None:
         print("새로운 퀴즈를 입력합니다.")
-        question = input("문제를 입력하세요: ").strip()
+        question = self.get_non_empty_text_input("문제를 입력하세요: ")
         choices: list[str] = []
 
         for index in range(1, 5):
-            choice = input(f"선택지 {index}: ").strip()
+            choice = self.get_non_empty_text_input(f"선택지 {index}: ")
             choices.append(choice)
 
         answer = self.get_int_input("정답 번호 (1-4): ", 1, 4)
@@ -69,6 +69,14 @@ class QuizGame:
             "answer": answer,
         }
         print("문제, 선택지, 정답 번호 입력이 완료되었습니다.")
+
+    def get_non_empty_text_input(self, prompt: str) -> str:
+        while True:
+            value = input(prompt).strip()
+            if value == "":
+                print("잘못된 입력입니다. 빈 입력은 허용되지 않습니다.")
+                continue
+            return value
 
     def show_quizzes(self) -> None:
         print("퀴즈 목록 기능을 실행합니다.")
