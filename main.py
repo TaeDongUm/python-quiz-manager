@@ -44,6 +44,7 @@ class QuizGame:
         score = int((correct_count / len(self.quizzes)) * 100)
         if self.best_score is None or score > self.best_score:
             self.best_score = score
+        self.save_state()
         print(f"\n총 {len(self.quizzes)}문제 중 {correct_count}문제를 맞혔습니다.")
         print(f"최종 점수: {score}점")
 
