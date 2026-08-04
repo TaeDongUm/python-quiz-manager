@@ -99,6 +99,10 @@ class QuizGame:
             print(f"{index}. {quiz.question}")
 
     def show_score(self) -> None:
+        if self.best_score is None:
+            print("아직 퀴즈를 풀지 않았습니다.")
+            return
+
         print(f"현재 최고 점수는 {self.best_score}점입니다.")
 
     def exit_game(self) -> None:
