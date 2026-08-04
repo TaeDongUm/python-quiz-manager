@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
@@ -37,33 +37,33 @@ class Quiz:
 
 DEFAULT_QUIZZES: list[Quiz] = [
     Quiz(
-        question="Python에서 리스트(list)와 튜플(tuple)의 가장 큰 차이는?",
-        choices=["리스트는 숫자만 저장", "튜플은 변경 불가능(immutable)", "리스트는 정렬이 안 됨", "튜플은 중복을 허용하지 않음"],
+        question="다음 코드의 실행 결과로 가장 알맞은 것은? 코드: x=[1,2]; y=x; y.append(3); print(x)",
+        choices=["[1, 2]", "[1, 2, 3]", "오류가 발생한다", "None이 출력된다"],
         answer=2,
     ),
     Quiz(
-        question="Python에서 딕셔너리(dict)의 키(key)로 사용할 수 없는 타입은?",
-        choices=["str", "int", "tuple", "list"],
-        answer=4,
-    ),
-    Quiz(
-        question="다음 중 Python의 논리 연산자가 아닌 것은?",
-        choices=["and", "or", "not", "xor"],
-        answer=4,
-    ),
-    Quiz(
-        question="Python에서 None과 0을 == 연산자로 비교하면?",
-        choices=["True", "False", "오류 발생", "None"],
-        answer=2,
-    ),
-    Quiz(
-        question="Python 클래스의 인스턴스 메서드 첫 번째 매개변수 이름으로 관례적으로 사용되는 것은?",
-        choices=["this", "me", "self", "cls"],
+        question="메뉴 입력 검증 로직이 여러 함수에 복붙되어 있다. 유지보수성을 높이면서 요구사항을 만족하는 가장 적절한 방법은?",
+        choices=["각 함수에 검증 코드를 그대로 유지한다", "검증 코드를 전역 변수에 문자열로 저장한다", "입력 검증 함수를 하나로 분리하고 재사용한다", "예외 처리를 모두 제거해 코드 길이를 줄인다"],
         answer=3,
     ),
     Quiz(
-        question="Python에서 range(5)가 생성하는 숫자 개수는?",
-        choices=["4개", "5개", "6개", "0개"],
+        question="아래 조건을 모두 만족해야 할 때 가장 적절한 자료구조는? 조건: 키 기반 조회가 많고, 값 수정이 자주 일어나며, 평균 조회 성능이 중요하다.",
+        choices=["list", "tuple", "dict", "set"],
+        answer=3,
+    ),
+    Quiz(
+        question="반복 횟수를 미리 알 수 없고, 사용자가 q를 입력하면 종료해야 한다. 가장 적절한 반복문 구성은?",
+        choices=["for range(고정횟수)", "while True와 break 조합", "리스트 컴프리헨션", "재귀 함수 반복 호출"],
         answer=2,
+    ),
+    Quiz(
+        question="문제 상태: 퀴즈를 추가해도 재실행하면 사라진다. 가장 근본적인 해결 방법은?",
+        choices=["메뉴 출력 문구를 수정한다", "퀴즈를 메모리 리스트에만 추가한다", "퀴즈 추가 직후 state.json 저장 함수를 호출한다", "퀴즈 목록 출력 횟수를 늘린다"],
+        answer=3,
+    ),
+    Quiz(
+        question="실행 중 Ctrl+C 또는 EOF가 발생해도 비정상 종료를 피하려면 가장 바람직한 동작은?",
+        choices=["트레이스백을 출력하고 즉시 종료한다", "예외를 무시하고 입력을 계속 받는다", "안내 메시지를 출력하고 가능한 상태를 저장한다. 이후 종료 또는 복귀는 프로그램 정책에 따른다.", "모든 입력 예외를 무조건 정답 처리한다"],
+        answer=3,
     ),
 ]
