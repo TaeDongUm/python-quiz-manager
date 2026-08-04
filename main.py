@@ -88,6 +88,8 @@ class QuizGame:
 
     def show_quizzes(self) -> None:
         print(f"등록된 퀴즈는 총 {len(self.quizzes)}개입니다.")
+        for index, quiz in enumerate(self.quizzes, start=1):
+            print(f"{index}. {quiz.question}")
 
     def show_score(self) -> None:
         print("점수 확인 기능을 실행합니다.")
