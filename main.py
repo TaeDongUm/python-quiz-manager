@@ -13,6 +13,7 @@ class QuizGame:
         self.is_running = True
         self.quizzes: list[Quiz] = []
         self.best_score: int | None = None
+        self.pending_quiz_input: dict | None = None
         self.load_state()
 
     def display_menu(self) -> None:
@@ -52,7 +53,19 @@ class QuizGame:
         return False
 
     def add_quiz(self) -> None:
-        print("퀴즈 추가 기능을 실행합니다.")
+        print("새로운 퀴즈를 입력합니다.")
+        question = input("문제를 입력하세요: ").strip()
+        choices: list[str] = []
+
+        for index in range(1, 5):
+            choice = input(f"선택지 {index}: ").strip()
+            choices.append(choice)
+
+        self.pending_quiz_input = {
+            "question": question,
+            "choices": choices,
+        }
+        print("문제와 선택지 입력이 완료되었습니다.")
 
     def show_quizzes(self) -> None:
         print("퀴즈 목록 기능을 실행합니다.")
