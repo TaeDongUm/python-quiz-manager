@@ -142,7 +142,7 @@ class QuizGame:
 
         try:
             with open(STATE_FILE, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=True, indent=4)
+                json.dump(data, f, ensure_ascii=False, indent=4)
         except OSError as e:
             print(f"ERROR: 파일을 저장하는 중 오류가 발생했습니다: {e}")
 
