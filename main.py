@@ -41,8 +41,9 @@ class QuizGame:
             if self.show_answer_result(quiz, user_answer):
                 correct_count += 1
 
+        score = int((correct_count / len(self.quizzes)) * 100)
         print(f"\n총 {len(self.quizzes)}문제 중 {correct_count}문제를 맞혔습니다.")
-        print(f"최종 점수: {correct_count}점")
+        print(f"최종 점수: {score}점")
 
     def show_answer_result(self, quiz: Quiz, user_answer: int) -> bool:
         if quiz.is_correct(user_answer):
