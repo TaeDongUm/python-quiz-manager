@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from typing import Optional
 
 from quiz import DEFAULT_QUIZZES, Quiz
 
@@ -13,8 +14,8 @@ class QuizGame:
     def __init__(self) -> None:
         self.is_running = True
         self.quizzes: list[Quiz] = []
-        self.best_score: int | None = None
-        self.pending_quiz_input: dict | None = None
+        self.best_score: Optional[int] = None
+        self.pending_quiz_input: Optional[dict] = None
         self.load_state()
 
     def display_menu(self) -> None:
@@ -28,7 +29,7 @@ class QuizGame:
         print("5. 종료")
         print("=" * 40)
 
-    def get_quiz_sequence(self, question_count: int | None = None) -> list[Quiz]:
+    def get_quiz_sequence(self, question_count: Optional[int] = None) -> list[Quiz]:
         quiz_sequence = list(self.quizzes)
         random.shuffle(quiz_sequence)
         if question_count is not None:
@@ -42,6 +43,10 @@ class QuizGame:
             len(self.quizzes),
         )
 
+    def calculate_score(self, correct_count: int, total_questions: int, hint_count: int) -> int:
+        base_score = int((correct_count / total_questions) * 100) if total_questions else 0
+        return max(0, base_score - (hint_count * 10))
+
     def play_quiz(self) -> None:
         if not self.quizzes:
             print("등록된 퀴즈가 없습니다.")
@@ -49,16 +54,24 @@ class QuizGame:
 
         print("퀴즈 풀기를 시작합니다.")
         correct_count = 0
+        hint_count = 0
         question_count = self.get_question_count()
         quiz_sequence = self.get_quiz_sequence(question_count)
 
         for index, quiz in enumerate(quiz_sequence, start=1):
             quiz.display(index)
+            if quiz.hint:
+                use_hint = input("힌트를 보시겠습니까? (y/n): ").strip().lower() == "y"
+                if use_hint:
+                    print(f"힌트: {quiz.hint}")
+                    hint_count += 1
+            else:
+                print("이 문제에는 힌트가 없습니다.")
             user_answer = self.get_int_input("정답 입력 (1-4): ", 1, 4)
             if self.show_answer_result(quiz, user_answer):
                 correct_count += 1
 
-        score = int((correct_count / len(quiz_sequence)) * 100)
+        score = self.calculate_score(correct_count, len(quiz_sequence), hint_count)
         if self.best_score is None or score > self.best_score:
             self.best_score = score
         self.save_state()
@@ -83,17 +96,20 @@ class QuizGame:
             choices.append(choice)
 
         answer = self.get_int_input("정답 번호 (1-4): ", 1, 4)
+        hint = self.get_non_empty_text_input("힌트(선택): ")
 
         self.pending_quiz_input = {
             "question": question,
             "choices": choices,
             "answer": answer,
+            "hint": hint,
         }
 
         new_quiz = Quiz(
             question=question,
             choices=choices,
             answer=answer,
+            hint=hint,
         )
         self.quizzes.append(new_quiz)
         self.save_state()
