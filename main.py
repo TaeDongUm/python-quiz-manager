@@ -28,10 +28,19 @@ class QuizGame:
         print("5. 종료")
         print("=" * 40)
 
-    def get_quiz_sequence(self) -> list[Quiz]:
+    def get_quiz_sequence(self, question_count: int | None = None) -> list[Quiz]:
         quiz_sequence = list(self.quizzes)
         random.shuffle(quiz_sequence)
+        if question_count is not None:
+            return quiz_sequence[:question_count]
         return quiz_sequence
+
+    def get_question_count(self) -> int:
+        return self.get_int_input(
+            f"몇 문제를 풀지 선택하세요 (1-{len(self.quizzes)}): ",
+            1,
+            len(self.quizzes),
+        )
 
     def play_quiz(self) -> None:
         if not self.quizzes:
@@ -40,7 +49,8 @@ class QuizGame:
 
         print("퀴즈 풀기를 시작합니다.")
         correct_count = 0
-        quiz_sequence = self.get_quiz_sequence()
+        question_count = self.get_question_count()
+        quiz_sequence = self.get_quiz_sequence(question_count)
 
         for index, quiz in enumerate(quiz_sequence, start=1):
             quiz.display(index)
