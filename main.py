@@ -1,5 +1,6 @@
 import json
 import os
+import random
 
 from quiz import DEFAULT_QUIZZES, Quiz
 
@@ -27,6 +28,11 @@ class QuizGame:
         print("5. 종료")
         print("=" * 40)
 
+    def get_quiz_sequence(self) -> list[Quiz]:
+        quiz_sequence = list(self.quizzes)
+        random.shuffle(quiz_sequence)
+        return quiz_sequence
+
     def play_quiz(self) -> None:
         if not self.quizzes:
             print("등록된 퀴즈가 없습니다.")
@@ -34,18 +40,19 @@ class QuizGame:
 
         print("퀴즈 풀기를 시작합니다.")
         correct_count = 0
+        quiz_sequence = self.get_quiz_sequence()
 
-        for index, quiz in enumerate(self.quizzes, start=1):
+        for index, quiz in enumerate(quiz_sequence, start=1):
             quiz.display(index)
             user_answer = self.get_int_input("정답 입력 (1-4): ", 1, 4)
             if self.show_answer_result(quiz, user_answer):
                 correct_count += 1
 
-        score = int((correct_count / len(self.quizzes)) * 100)
+        score = int((correct_count / len(quiz_sequence)) * 100)
         if self.best_score is None or score > self.best_score:
             self.best_score = score
         self.save_state()
-        print(f"\n총 {len(self.quizzes)}문제 중 {correct_count}문제를 맞혔습니다.")
+        print(f"\n총 {len(quiz_sequence)}문제 중 {correct_count}문제를 맞혔습니다.")
         print(f"최종 점수: {score}점")
 
     def show_answer_result(self, quiz: Quiz, user_answer: int) -> bool:
