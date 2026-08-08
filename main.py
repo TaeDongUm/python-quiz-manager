@@ -26,7 +26,8 @@ class QuizGame:
         print("2. 퀴즈 추가")
         print("3. 퀴즈 목록")
         print("4. 점수 확인")
-        print("5. 종료")
+        print("5. 퀴즈 삭제")
+        print("6. 종료")
         print("=" * 40)
 
     def get_quiz_sequence(self, question_count: Optional[int] = None) -> list[Quiz]:
@@ -132,12 +133,34 @@ class QuizGame:
         for index, quiz in enumerate(self.quizzes, start=1):
             print(f"{index}. {quiz.question}")
 
+    def delete_quiz(self, quiz_index: int) -> None:
+        if not self.quizzes:
+            print("등록된 퀴즈가 없습니다.")
+            return
+
+        if quiz_index < 1 or quiz_index > len(self.quizzes):
+            print("잘못된 번호입니다.")
+            return
+
+        deleted_quiz = self.quizzes.pop(quiz_index - 1)
+        self.save_state()
+        print(f"'{deleted_quiz.question}' 문제가 삭제되었습니다.")
+
     def show_score(self) -> None:
         if self.best_score is None:
             print("아직 퀴즈를 풀지 않았습니다.")
             return
 
         print(f"현재 최고 점수는 {self.best_score}점입니다.")
+
+    def delete_quiz_menu(self) -> None:
+        if not self.quizzes:
+            print("등록된 퀴즈가 없습니다.")
+            return
+
+        self.show_quizzes()
+        quiz_index = self.get_int_input("삭제할 퀴즈 번호를 입력하세요: ", 1, len(self.quizzes))
+        self.delete_quiz(quiz_index)
 
     def exit_game(self) -> None:
         print("프로그램을 종료합니다.")
@@ -211,7 +234,7 @@ class QuizGame:
             return value
 
     def get_menu_choice(self) -> str:
-        return str(self.get_int_input("선택: ", 1, 5))
+        return str(self.get_int_input("선택: ", 1, 6))
 
     def run(self) -> None:
         actions = {
@@ -219,7 +242,8 @@ class QuizGame:
             "2": self.add_quiz,
             "3": self.show_quizzes,
             "4": self.show_score,
-            "5": self.exit_game,
+            "5": self.delete_quiz_menu,
+            "6": self.exit_game,
         }
 
         try:
