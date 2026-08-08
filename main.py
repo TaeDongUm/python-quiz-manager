@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from datetime import datetime
 from typing import Optional
 
 from quiz import DEFAULT_QUIZZES, Quiz
@@ -16,6 +17,7 @@ class QuizGame:
         self.quizzes: list[Quiz] = []
         self.best_score: Optional[int] = None
         self.pending_quiz_input: Optional[dict] = None
+        self.score_history: list[dict] = []
         self.load_state()
 
     def display_menu(self) -> None:
@@ -27,7 +29,8 @@ class QuizGame:
         print("3. 퀴즈 목록")
         print("4. 점수 확인")
         print("5. 퀴즈 삭제")
-        print("6. 종료")
+        print("6. 기록 보기")
+        print("7. 종료")
         print("=" * 40)
 
     def get_quiz_sequence(self, question_count: Optional[int] = None) -> list[Quiz]:
@@ -75,6 +78,7 @@ class QuizGame:
         score = self.calculate_score(correct_count, len(quiz_sequence), hint_count)
         if self.best_score is None or score > self.best_score:
             self.best_score = score
+        self.record_score_history(score, len(quiz_sequence))
         self.save_state()
         print(f"\n총 {len(quiz_sequence)}문제 중 {correct_count}문제를 맞혔습니다.")
         print(f"최종 점수: {score}점")
@@ -162,6 +166,26 @@ class QuizGame:
         quiz_index = self.get_int_input("삭제할 퀴즈 번호를 입력하세요: ", 1, len(self.quizzes))
         self.delete_quiz(quiz_index)
 
+    def record_score_history(self, score: int, question_count: int) -> None:
+        self.score_history.append(
+            {
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "score": score,
+                "question_count": question_count,
+            }
+        )
+
+    def show_score_history(self) -> None:
+        if not self.score_history:
+            print("아직 게임 기록이 없습니다.")
+            return
+
+        print("게임 기록")
+        for entry in self.score_history:
+            print(
+                f"{entry['timestamp']} | 점수: {entry['score']}점 | 푼 문제 수: {entry['question_count']}"
+            )
+
     def exit_game(self) -> None:
         print("프로그램을 종료합니다.")
         self.is_running = False
@@ -189,6 +213,7 @@ class QuizGame:
 
             self.quizzes = [Quiz.from_dict(q) for q in quizzes_data]
             self.best_score = data.get("best_score", None)
+            self.score_history = data.get("score_history", [])
         except json.JSONDecodeError:
             print("ERROR: state.json 파일이 손상되었습니다. 기본 데이터로 초기화합니다.")
             self.quizzes = list(DEFAULT_QUIZZES)
@@ -202,6 +227,7 @@ class QuizGame:
         data = {
             "quizzes": [quiz.to_dict() for quiz in self.quizzes],
             "best_score": self.best_score,
+            "score_history": self.score_history,
         }
 
         try:
@@ -234,7 +260,7 @@ class QuizGame:
             return value
 
     def get_menu_choice(self) -> str:
-        return str(self.get_int_input("선택: ", 1, 6))
+        return str(self.get_int_input("선택: ", 1, 7))
 
     def run(self) -> None:
         actions = {
@@ -243,7 +269,8 @@ class QuizGame:
             "3": self.show_quizzes,
             "4": self.show_score,
             "5": self.delete_quiz_menu,
-            "6": self.exit_game,
+            "6": self.show_score_history,
+            "7": self.exit_game,
         }
 
         try:
