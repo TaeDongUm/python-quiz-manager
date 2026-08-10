@@ -1,8 +1,8 @@
-import random
 from typing import Optional
 
 from console_io import ConsoleIO
 from quiz import Quiz
+from quiz_repository import QuizRepository
 from score_manager import ScoreManager
 from storage import JsonStateStore
 
@@ -14,30 +14,22 @@ class QuizGame:
         self.io = ConsoleIO()
         self.storage = JsonStateStore()
         self.score_manager = ScoreManager()
+        self.repository = QuizRepository()
         self.is_running = True
-        self.quizzes: list[Quiz] = []
-        self.pending_quiz_input: Optional[dict] = None
         self.load_state()
 
     def display_menu(self) -> None:
         self.io.display_menu()
 
-    def get_quiz_sequence(self, question_count: Optional[int] = None) -> list[Quiz]:
-        quiz_sequence = list(self.quizzes)
-        random.shuffle(quiz_sequence)
-        if question_count is not None:
-            return quiz_sequence[:question_count]
-        return quiz_sequence
-
     def get_question_count(self) -> int:
         return self.io.get_int_input(
-            f"몇 문제를 풀지 선택하세요 (1-{len(self.quizzes)}): ",
+            f"몇 문제를 풀지 선택하세요 (1-{self.repository.get_count()}): ",
             1,
-            len(self.quizzes),
+            self.repository.get_count(),
         )
 
     def play_quiz(self) -> None:
-        if not self.quizzes:
+        if self.repository.is_empty():
             print("등록된 퀴즈가 없습니다.")
             return
 
@@ -45,7 +37,7 @@ class QuizGame:
         correct_count = 0
         hint_count = 0
         question_count = self.get_question_count()
-        quiz_sequence = self.get_quiz_sequence(question_count)
+        quiz_sequence = self.repository.get_sequence(question_count)
 
         for index, quiz in enumerate(quiz_sequence, start=1):
             quiz.display(index)
@@ -87,42 +79,35 @@ class QuizGame:
         answer = self.io.get_int_input("정답 번호 (1-4): ", 1, 4)
         hint = self.io.get_non_empty_text_input("힌트(선택): ")
 
-        self.pending_quiz_input = {
-            "question": question,
-            "choices": choices,
-            "answer": answer,
-            "hint": hint,
-        }
-
         new_quiz = Quiz(
             question=question,
             choices=choices,
             answer=answer,
             hint=hint,
         )
-        self.quizzes.append(new_quiz)
+        self.repository.add(new_quiz)
         self.save_state()
-        print(f"문제, 선택지, 정답 번호 입력이 완료되었습니다. (총 {len(self.quizzes)}개)")
+        print(f"문제, 선택지, 정답 번호 입력이 완료되었습니다. (총 {self.repository.get_count()}개)")
 
     def show_quizzes(self) -> None:
-        if not self.quizzes:
+        if self.repository.is_empty():
             print("등록된 퀴즈가 없습니다.")
             return
 
-        print(f"등록된 퀴즈는 총 {len(self.quizzes)}개입니다.")
-        for index, quiz in enumerate(self.quizzes, start=1):
+        print(f"등록된 퀴즈는 총 {self.repository.get_count()}개입니다.")
+        for index, quiz in enumerate(self.repository.get_all(), start=1):
             print(f"{index}. {quiz.question}")
 
     def delete_quiz(self, quiz_index: int) -> None:
-        if not self.quizzes:
+        if self.repository.is_empty():
             print("등록된 퀴즈가 없습니다.")
             return
 
-        if quiz_index < 1 or quiz_index > len(self.quizzes):
+        deleted_quiz = self.repository.delete(quiz_index)
+        if deleted_quiz is None:
             print("잘못된 번호입니다.")
             return
 
-        deleted_quiz = self.quizzes.pop(quiz_index - 1)
         self.save_state()
         print(f"'{deleted_quiz.question}' 문제가 삭제되었습니다.")
 
@@ -134,12 +119,12 @@ class QuizGame:
         print(f"현재 최고 점수는 {self.score_manager.get_best_score()}점입니다.")
 
     def delete_quiz_menu(self) -> None:
-        if not self.quizzes:
+        if self.repository.is_empty():
             print("등록된 퀴즈가 없습니다.")
             return
 
         self.show_quizzes()
-        quiz_index = self.io.get_int_input("삭제할 퀴즈 번호를 입력하세요: ", 1, len(self.quizzes))
+        quiz_index = self.io.get_int_input("삭제할 퀴즈 번호를 입력하세요: ", 1, self.repository.get_count())
         self.delete_quiz(quiz_index)
 
     def show_score_history(self) -> None:
@@ -159,12 +144,12 @@ class QuizGame:
 
     def load_state(self) -> None:
         quizzes, best_score_loaded, score_history_loaded = self.storage.load()
-        self.quizzes = quizzes
+        self.repository = QuizRepository(quizzes)
         self.score_manager = ScoreManager(best_score_loaded, score_history_loaded)
 
     def save_state(self) -> None:
         self.storage.save(
-            self.quizzes,
+            self.repository.get_all(),
             self.score_manager.get_best_score(),
             self.score_manager.get_score_history(),
         )
