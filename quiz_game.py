@@ -1,9 +1,9 @@
 import random
-from datetime import datetime
 from typing import Optional
 
 from console_io import ConsoleIO
 from quiz import Quiz
+from score_manager import ScoreManager
 from storage import JsonStateStore
 
 
@@ -13,11 +13,10 @@ class QuizGame:
     def __init__(self) -> None:
         self.io = ConsoleIO()
         self.storage = JsonStateStore()
+        self.score_manager = ScoreManager()
         self.is_running = True
         self.quizzes: list[Quiz] = []
-        self.best_score: Optional[int] = None
         self.pending_quiz_input: Optional[dict] = None
-        self.score_history: list[dict] = []
         self.load_state()
 
     def display_menu(self) -> None:
@@ -36,10 +35,6 @@ class QuizGame:
             1,
             len(self.quizzes),
         )
-
-    def calculate_score(self, correct_count: int, total_questions: int, hint_count: int) -> int:
-        base_score = int((correct_count / total_questions) * 100) if total_questions else 0
-        return max(0, base_score - (hint_count * 10))
 
     def play_quiz(self) -> None:
         if not self.quizzes:
@@ -65,10 +60,9 @@ class QuizGame:
             if self.show_answer_result(quiz, user_answer):
                 correct_count += 1
 
-        score = self.calculate_score(correct_count, len(quiz_sequence), hint_count)
-        if self.best_score is None or score > self.best_score:
-            self.best_score = score
-        self.record_score_history(score, len(quiz_sequence))
+        score = self.score_manager.calculate_score(correct_count, len(quiz_sequence), hint_count)
+        self.score_manager.update_best_score(score)
+        self.score_manager.record_history(score, len(quiz_sequence))
         self.save_state()
         print(f"\n총 {len(quiz_sequence)}문제 중 {correct_count}문제를 맞혔습니다.")
         print(f"최종 점수: {score}점")
@@ -133,11 +127,11 @@ class QuizGame:
         print(f"'{deleted_quiz.question}' 문제가 삭제되었습니다.")
 
     def show_score(self) -> None:
-        if self.best_score is None:
+        if self.score_manager.get_best_score() is None:
             print("아직 퀴즈를 풀지 않았습니다.")
             return
 
-        print(f"현재 최고 점수는 {self.best_score}점입니다.")
+        print(f"현재 최고 점수는 {self.score_manager.get_best_score()}점입니다.")
 
     def delete_quiz_menu(self) -> None:
         if not self.quizzes:
@@ -148,22 +142,13 @@ class QuizGame:
         quiz_index = self.io.get_int_input("삭제할 퀴즈 번호를 입력하세요: ", 1, len(self.quizzes))
         self.delete_quiz(quiz_index)
 
-    def record_score_history(self, score: int, question_count: int) -> None:
-        self.score_history.append(
-            {
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "score": score,
-                "question_count": question_count,
-            }
-        )
-
     def show_score_history(self) -> None:
-        if not self.score_history:
+        if not self.score_manager.get_score_history():
             print("아직 게임 기록이 없습니다.")
             return
 
         print("게임 기록")
-        for entry in self.score_history:
+        for entry in self.score_manager.get_score_history():
             print(
                 f"{entry['timestamp']} | 점수: {entry['score']}점 | 푼 문제 수: {entry['question_count']}"
             )
@@ -173,13 +158,16 @@ class QuizGame:
         self.is_running = False
 
     def load_state(self) -> None:
-        quizzes, best_score, score_history = self.storage.load()
+        quizzes, best_score_loaded, score_history_loaded = self.storage.load()
         self.quizzes = quizzes
-        self.best_score = best_score
-        self.score_history = score_history
+        self.score_manager = ScoreManager(best_score_loaded, score_history_loaded)
 
     def save_state(self) -> None:
-        self.storage.save(self.quizzes, self.best_score, self.score_history)
+        self.storage.save(
+            self.quizzes,
+            self.score_manager.get_best_score(),
+            self.score_manager.get_score_history(),
+        )
 
     def run(self) -> None:
         actions = {
