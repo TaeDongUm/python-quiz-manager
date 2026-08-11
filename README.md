@@ -494,3 +494,6 @@ abc
 ![making files](https://github.com/TaeDongUm/python-quiz-manager/blob/main/screenshots/gitpull.png)
 
 ### 브랜치 생성 및 병합
+
+![making files](https://github.com/TaeDongUm/python-quiz-manager/blob/main/screenshots/newbranchrefactor0.png)
+![making files](https://github.com/TaeDongUm/python-quiz-manager/blob/main/screenshots/newbranchrefactor.png)
