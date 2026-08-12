@@ -497,3 +497,320 @@ abc
 
 ![making files](https://github.com/TaeDongUm/python-quiz-manager/blob/main/screenshots/newbranchrefactor0.png)
 ![making files](https://github.com/TaeDongUm/python-quiz-manager/blob/main/screenshots/newbranchrefactor.png)
+
+> 브랜치와 병합 (왜 필요한지, 병합 결과의 의미)
+
+#### 브랜치랑
+
+> 현재 작업 내용을 그대로 유지한 채, 별도의 작업 흐름을 만들어 기능을 독립적으로 개발하기 위한 것 (작업을 분리하기 위한 것)
+
+- 예시: `main` 브랜치에서 정상 동작하는 코드가 있는데 `퀴즈 풀기 기능`을 추가한다고 하면 바로 `main` 에서 수정하면서 개발하면 `main`에서 정상 동작하던 프로그램에 오류가 발생할 수 있습니다. 그래서, 새로운 브랜치를 만들어 별도로 작업하고 테스트한 뒤, 문제가 없을 때 `main`에 반영하면 좀 더 안전하게 개발을 진행할 수 있습니다.
+
+#### 병합
+
+> 분리해서 작업한 브랜치의 변경사항을 다른 브랜치에 합치는 작업
+
+- `feature/play-quiz` 브랜치에서 퀴즈 풀기 기능을 완성한 뒤 `main` 브랜치에 병합하면, `main`에도 그 기능이 포함됩니다.
+- 해당 브랜치에서 만든 변경 이력이 대상 브랜치(main)의 코드 흐름에 합쳐집니다.
+
+1. 
+
+### git branch 목록 조회
+
+![making files](https://github.com/TaeDongUm/python-quiz-manager/blob/main/screenshots/gitbranchlist.png)
+
+## 10. 커밋 메시지 규칙
+
+- 기본 형태
+
+> <type> : <커밋 메시지>
+
+| Type       | 네 레포에서의 의미                   | 실제 예시                                                           |
+| ---------- | ---------------------------- | --------------------------------------------------------------- |
+| `feat`     | 새로운 기능 추가 또는 기능 동작 구현        | `feat: 점수 기록 히스토리 구현`                                           |
+| `refactor` | 기능은 유지하면서 코드 구조나 책임을 재배치     | `refactor: quiz_game의 상태 저장/ 복원 역할 storage의 JsonStateStore에 이관` |
+| `docs`     | README, 체크리스트, 학습 기록 등 문서 변경 | `docs: 프로젝트 개요, 구현한 프로그램 설명`                                    |
+| `chore`    | 기능 구현과 직접 관련 없는 정리, 데이터 수정 작업 | `chore: 기존 문제를 미션2와 연관지어서 수정`                                   |
+
+
+## 11. JSON 기반 구조가 커지게 되면?
+
+`state.json`은 **직접 CRUD를 수행하는 저장소라기보다, 프로그램 상태 전체를 저장하고 복원하는 영속성 파일**입니다. 실제 파일 접근은 `JsonStateStore`가 담당하고, 퀴즈 조작은 `QuizRepository`, 점수 조작은 `ScoreManager`, 전체 흐름 연결은 `QuizGame`이 맡고 있습니다.
+
+### 기존 방식
+
+- 프로그램 시작 시 `state.json` 전체를 읽어서 메모리에 올리고 파일을 읽기, 쓰기, 조회, 갱신, 추가, 삭제 작업 시 현재 상태 전체를 다시 저장합니다.
+
+### 조회
+
+```text
+프로그램 실행
+    ↓
+QuizGame.load_state()
+    ↓
+JsonStateStore.load()
+    ↓
+state.json 전체 읽기
+    ↓
+quizzes / best_score / score_history 추출
+    ↓
+메모리 객체로 복원
+```
+
+- 프로그램 시작 시 `QuizGame.__init__()`에서 `load_state()`를 호출하고, 여기서 `JsonStateStore.load()`가 `state.json`을 읽습니다.
+
+- `storage.py` 에서 파일 전체를 문자열로 읽은 다음 `json.loads()`로 파싱한 뒤 아래 3개의 값을 꺼내서 반환하고 이 3개의 값을 바탕으로 `Quiz` 객체로 만듭니다.
+
+```text
+quizzes
+best_score
+score_history
+```
+
+> 읽기는 `state.json` -> 메모리 전체 복원 방식
+
+### 쓰기 
+
+`QuizGame.save_state()`가 현재 메모리에 존재하는:
+
+```text
+전체 퀴즈
+최고 점수
+전체 점수 기록
+```
+
+을 가져와 `storage.save()`에 전달합니다.
+
+`JsonStateStore.save()`에서는:
+
+```python
+{
+    "quizzes": ...,
+    "best_score": ...,
+    "score_history": ...
+}
+```
+
+형태의 데이터를 만든 다음 `"w"` 모드로 `state.json`을 열어 `json.dump()`로 저장합니다.
+
+> **변경된 부분만 쓰는 것이 아니라 현재 상태 전체를 다시 저장한다는 것**
+
+예를 들어 퀴즈 1개만 추가돼도:
+
+```text
+퀴즈 1개만 추가
+     ↓
+현재 퀴즈 전체 가져오기
+현재 최고 점수 가져오기
+현재 기록 전체 가져오기
+     ↓
+state.json 전체 다시 작성
+```
+이 됩니다.
+
+---
+
+### 조회(Read/Search)
+
+> **퀴즈 목록을 볼 때마다 `state.json`을 다시 조회하는 구조가 아닙니다.**
+
+프로그램 시작할 때 한 번 JSON을 읽어서:
+
+```text
+state.json
+    ↓
+QuizRepository.quizzes
+ScoreManager.best_score
+ScoreManager.score_history
+```
+
+처럼 메모리에 올려놓고 그 이후 조회는 **JSON 파일이 아니라 메모리에서 수행합니다.**
+
+### 퀴즈 목록 조회
+
+`show_quizzes()`는:
+
+```python
+self.repository.get_all()
+```
+
+을 사용해 현재 메모리에 있는 퀴즈 리스트를 가져옵니다.
+
+### 퀴즈 개수 조회
+
+```python
+self.repository.get_count()
+```
+
+로 리스트 길이를 확인합니다.
+
+### 최고 점수 조회
+
+```python
+self.score_manager.get_best_score()
+```
+
+로 메모리에 저장된 최고 점수를 가져옵니다.
+
+### 기록 조회
+
+```python
+self.score_manager.get_score_history()
+```
+
+로 메모리의 기록 리스트를 조회합니다.
+
+따라서 정확하게 말하면:
+
+> `state.json`은 프로그램 시작 시 상태 복원에 사용되고, 프로그램 실행 중 일반적인 조회는 메모리에 복원된 객체를 대상으로 수행합니다.
+
+---
+
+### 추가(Create)
+
+사용자가 새로운 퀴즈를 추가하면 먼저 `Quiz` 객체를 만듭니다.
+
+그 다음:
+
+```python
+self.repository.add(new_quiz)
+```
+
+가 실행되고, `QuizRepository.add()`는 내부 리스트에 `append()`합니다. 
+
+그 직후:
+
+```python
+self.save_state()
+```
+
+가 호출됩니다.
+
+따라서 흐름은:
+
+```text
+사용자 퀴즈 입력
+    ↓
+Quiz 객체 생성
+    ↓
+QuizRepository 리스트에 append
+    ↓
+save_state()
+    ↓
+현재 전체 상태를 state.json에 다시 저장
+```
+
+이야.
+
+즉 **state.json에 직접 한 줄을 추가하는 방식이 아닙니다.**
+
+---
+
+### 삭제(Delete)
+
+사용자가 삭제할 번호를 입력하면:
+
+```python
+self.repository.delete(quiz_index)
+```
+
+를 호출하고 Repository에서는:
+
+```python
+self.quizzes.pop(quiz_index - 1)
+```
+
+으로 **메모리 리스트에서 먼저 삭제**합니다.
+
+그 뒤:
+
+```python
+self.save_state()
+```
+
+를 호출합니다.
+
+즉:
+
+```text
+삭제 번호 선택
+    ↓
+메모리 리스트에서 pop()
+    ↓
+save_state()
+    ↓
+삭제된 상태의 전체 데이터를
+state.json에 다시 작성
+```
+
+따라서 JSON 내부에서 특정 퀴즈만 찾아서 지우는 것이 아닙니다.
+
+---
+
+### 갱신(Update)
+
+갱신은 대표적으로 **최고 점수 갱신**이 있고
+
+퀴즈가 끝나면:
+
+```python
+self.score_manager.update_best_score(score)
+```
+
+가 호출됩니다.
+
+`ScoreManager`에서는 새 점수가 기존 최고 점수보다 높을 때:
+
+```python
+self.best_score = new_score
+```
+
+로 메모리 값을 변경합니다. 
+
+또한 게임 기록도:
+
+```python
+self.score_history.append(...)
+```
+
+로 메모리에 추가됩니다.
+
+그리고 게임이 끝나면:
+
+```python
+self.save_state()
+```
+
+가 호출됩니다.
+
+따라서:
+
+```text
+게임 완료
+   ↓
+점수 계산
+   ↓
+best_score 메모리 값 갱신
+   ↓
+score_history 메모리에 기록 추가
+   ↓
+save_state()
+   ↓
+전체 state.json 다시 저장
+```
+---
+
+###  표로 정리
+
+| 동작 | 실제 처리 대상                | `state.json` 사용 방식       |
+| -- | ----------------------- | ------------------------ |
+| 읽기 | `JsonStateStore`        | 실행 시 파일 전체를 읽고 상태 복원     |
+| 조회 | 메모리의 Repository/Manager | 실행 중에는 JSON을 다시 읽지 않음    |
+| 추가 | 메모리 리스트                 | 추가 후 전체 JSON 다시 저장       |
+| 삭제 | 메모리 리스트                 | 삭제 후 전체 JSON 다시 저장       |
+| 갱신 | 메모리의 점수/기록              | 변경 후 전체 JSON 다시 저장       |
+| 쓰기 | `JsonStateStore`        | 현재 상태 전체를 `"w"` 모드로 덮어쓰기 |
+
+> **`state.json`은 매 작업마다 직접 검색, 수정하는 데이터베이스처럼 사용하지 않고, 프로그램 시작 시 전체 상태를 메모리로 복원하고 실행 중에는 메모리에서 조회, 추가, 삭제, 갱신한 뒤 상태가 변경될 때 전체 상태를 다시 JSON 파일에 저장하는 방식으로 사용하고 있습니다.**
+
+즉, 데이터가 커지면 `1개 수정 → 전체 JSON 다시 저장`이라는 구조가 병목이 될 수 있습니다.
