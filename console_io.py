@@ -47,6 +47,10 @@ class ConsoleIO:
     def get_menu_choice(self) -> str:
         return str(self.get_int_input("선택: ", 1, 7))
 
-    def safe_exit(self, message: str) -> None:
+    def safe_exit(self, message: str, state_saved: bool) -> None:
         print(f"\n{message}")
+        if state_saved:
+            print("현재 상태를 저장했습니다.")
+        else:
+            print("현재 상태를 저장하지 못했습니다.")
         print("프로그램을 안전하게 종료합니다.")

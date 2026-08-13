@@ -39,7 +39,7 @@ class JsonStateStore:
             print(f"ERROR: 파일을 읽는 중 오류가 발생했습니다: {e}")
             return list(DEFAULT_QUIZZES), None, []
 
-    def save(self, quizzes: list[Quiz], best_score: Optional[int], score_history: list[dict]) -> None:
+    def save(self, quizzes: list[Quiz], best_score: Optional[int], score_history: list[dict]) -> bool:
         data = {
             "quizzes": [quiz.to_dict() for quiz in quizzes],
             "best_score": best_score,
@@ -49,5 +49,7 @@ class JsonStateStore:
         try:
             with open(self.state_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
+            return True
         except OSError as e:
             print(f"ERROR: 파일을 저장하는 중 오류가 발생했습니다: {e}")
+            return False

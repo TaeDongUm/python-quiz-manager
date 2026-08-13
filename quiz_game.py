@@ -147,8 +147,8 @@ class QuizGame:
         self.repository = QuizRepository(quizzes)
         self.score_manager = ScoreManager(best_score_loaded, score_history_loaded)
 
-    def save_state(self) -> None:
-        self.storage.save(
+    def save_state(self) -> bool:
+        return self.storage.save(
             self.repository.get_all(),
             self.score_manager.get_best_score(),
             self.score_manager.get_score_history(),
@@ -174,6 +174,8 @@ class QuizGame:
                 if action:
                     action()
         except KeyboardInterrupt:
-            self.io.safe_exit("사용자에 의해 프로그램이 중단되었습니다.")
+            state_saved = self.save_state()
+            self.io.safe_exit("사용자에 의해 프로그램이 중단되었습니다.", state_saved)
         except EOFError:
-            self.io.safe_exit("입력 스트림이 종료되었습니다.")
+            state_saved = self.save_state()
+            self.io.safe_exit("입력 스트림이 종료되었습니다.", state_saved)
