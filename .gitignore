@@ -15,3 +15,6 @@ venv/
 # IDE
 .vscode/
 .idea/
+
+# 로컬 백업 파일
+*.bak
