@@ -5,7 +5,7 @@ from typing import Optional
 class ScoreManager:
     """점수 정책과 기록을 관리한다."""
 
-    def __init__(self, best_score: Optional[int] = None, score_history: list[dict] | None = None) -> None:
+    def __init__(self, best_score: Optional[int] = None, score_history: list[dict] = None) -> None:
         self.best_score = best_score
         self.score_history = score_history if score_history is not None else []
 

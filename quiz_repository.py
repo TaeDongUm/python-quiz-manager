@@ -7,7 +7,7 @@ from quiz import Quiz
 class QuizRepository:
     """퀴즈 목록을 관리하고 조작한다."""
 
-    def __init__(self, quizzes: list[Quiz] | None = None) -> None:
+    def __init__(self, quizzes: list[Quiz] = None) -> None:
         self.quizzes = quizzes if quizzes is not None else []
 
     def add(self, quiz: Quiz) -> None:
