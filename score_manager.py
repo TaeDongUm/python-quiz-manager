@@ -7,10 +7,16 @@ class ScoreManager:
 
     def __init__(self, best_score: Optional[int] = None, score_history: list[dict] = None) -> None:
         self.best_score = best_score
-        self.score_history = score_history if score_history is not None else []
+        if score_history is not None:
+            self.score_history = score_history
+        else:
+            self.score_history = []
 
     def calculate_score(self, correct_count: int, total_questions: int, hint_count: int) -> int:
-        base_score = int((correct_count / total_questions) * 100) if total_questions else 0
+        if total_questions:
+            base_score = int((correct_count / total_questions) * 100)
+        else:
+            base_score = 0
         return max(0, base_score - (hint_count * 10))
 
     def update_best_score(self, new_score: int) -> None:
