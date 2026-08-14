@@ -42,10 +42,17 @@ class QuizGame:
         for index, quiz in enumerate(quiz_sequence, start=1):
             quiz.display(index)
             if quiz.hint:
-                use_hint = input("힌트를 보시겠습니까? (y/n): ").strip().lower() == "y"
-                if use_hint:
-                    print(f"힌트: {quiz.hint}")
-                    hint_count += 1
+                while True:
+                    use_hint = input("힌트를 보시겠습니까? (y/n): ").strip().lower()
+                    if use_hint == "y":
+                        print(f"힌트: {quiz.hint}")
+                        hint_count += 1
+                        break
+                    elif use_hint == "n":
+                        print(f"힌트를 사용하지 않음을 선택하셨습니다.")
+                        break
+                    else:
+                        print(f"y 이나 n을 넣어주세요.")
             else:
                 print("이 문제에는 힌트가 없습니다.")
             user_answer = self.io.get_int_input("정답 입력 (1-4): ", 1, 4)
