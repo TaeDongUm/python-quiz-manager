@@ -275,6 +275,34 @@ python-quiz-manager/
 ├── README.md
 └── .gitignore
 ```
+```text
+python-quiz-manager/
+│
+├── main.py
+│     └─ 프로그램 시작
+│
+├── quiz_game.py
+│     └─ 전체 흐름을 지휘
+│
+├── console_io.py
+│     └─ 사용자 입력 + 입력 검증 + 메뉴 출력
+│
+├── quiz.py
+│     └─ 퀴즈 한 문제의 데이터 + 정답 판정
+│
+├── quiz_repository.py
+│     └─ 여러 Quiz 객체를 보관/추가/삭제/조회
+│
+├── score_manager.py
+│     └─ 점수 계산 + 최고 점수 + 기록 관리
+│
+├── storage.py
+│     └─ state.json 저장/불러오기 + 백업/복구
+│
+└── state.json
+      └─ 프로그램 종료 후에도 유지할 실제 데이터
+```
+
 
 ### `main.py`
 
